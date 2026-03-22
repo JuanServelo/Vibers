@@ -1,0 +1,29 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: vibers_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: vibers
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Vibers@2112
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  auth-service:
+    build: 
+      context: ../services/auth-service 
+      dockerfile: Dockerfile            
+    container_name: vibers_auth_service
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:Vibers%402112@postgres:5432/vibers
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
