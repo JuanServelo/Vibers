@@ -1,5 +1,9 @@
 node_modules
-# Keep environment variables out of version control
+dist
+
+# Variáveis de ambiente
 .env
 
-/generated/prisma
+# Cliente Prisma gerado (recriado via npx prisma generate)
+src/generated/
+generated/

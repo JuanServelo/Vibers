@@ -1,391 +1,261 @@
 # Vibers ERP
 
-## Overview
+## Visão Geral
 
 **Vibers ERP** é um ecossistema SaaS multi-tenant projetado para fornecer uma plataforma completa de gestão empresarial para pequenas e médias empresas.
 
-O sistema é modular e baseado em **microserviços**, permitindo que diferentes funcionalidades do ERP sejam escaladas e mantidas independentemente.
-
-O objetivo do projeto é oferecer um **ERP altamente personalizável**, permitindo que cada cliente utilize apenas os módulos necessários para seu negócio.
+O sistema é modular e baseado em **microserviços**, permitindo que diferentes funcionalidades do ERP sejam escaladas e mantidas de forma independente. Cada cliente (tenant) utiliza apenas os módulos necessários para seu negócio.
 
 ---
 
-# Arquitetura do Sistema
+## Status do Projeto
 
-A arquitetura do Vibers segue o padrão de **microserviços**, onde cada domínio do sistema é implementado como um serviço independente.
+| Serviço | Status | Descrição |
+|---|---|---|
+| `auth-service` | ✅ Fase 1 completa | Autenticação, usuários, tenants, JWT |
+| `inventory-service` | 🔲 Planejado | Controle de estoque |
+| `sales-service` | 🔲 Planejado | Pedidos e pagamentos |
+| `delivery-service` | 🔲 Planejado | Rotas e entregas |
+| `tickets-service` | 🔲 Planejado | Suporte técnico |
+| `gateway` | 🔲 Planejado | API Gateway central |
+| `frontend` | 🔲 Planejado | Interface React |
+
+---
+
+## Arquitetura
+
+O Vibers segue o padrão de **microserviços**, onde cada domínio é um serviço independente com seu próprio banco de dados, API e deploy.
+
+```
+                          ┌─────────────────┐
+                          │     Frontend     │
+                          │   React + Vite   │
+                          └────────┬────────┘
+                                   │
+                          ┌────────▼────────┐
+                          │     Gateway      │
+                          │   API Gateway    │
+                          └────────┬────────┘
+                                   │
+              ┌────────────────────┼────────────────────┐
+              │                    │                    │
+     ┌────────▼────────┐  ┌────────▼────────┐  ┌───────▼─────────┐
+     │  auth-service   │  │inventory-service│  │  sales-service  │
+     │   porta 3000    │  │   porta 3001    │  │   porta 3002    │
+     └────────┬────────┘  └────────┬────────┘  └───────┬─────────┘
+              │                    │                    │
+     ┌────────▼────────┐  ┌────────▼────────┐  ┌───────▼─────────┐
+     │   PostgreSQL    │  │   PostgreSQL    │  │   PostgreSQL    │
+     │  vibers (auth)  │  │  (inventory)   │  │    (sales)      │
+     └─────────────────┘  └─────────────────┘  └─────────────────┘
+```
 
 Cada serviço possui:
+- Código independente
+- Banco de dados próprio
+- API REST própria
+- Deploy independente via Docker
 
-* código independente
-* banco de dados próprio
-* API própria
-* deploy independente
+---
 
-Estrutura simplificada:
+## Estrutura de Pastas
 
 ```
-Vibers
+Vibers/
 │
-├ frontend
+├── docker/
+│   └── docker-compose.yml          # Orquestração do ambiente completo
 │
-├ services
-│   ├ auth-service
-│   ├ users-service
-│   ├ inventory-service
-│   ├ sales-service
-│   ├ delivery-service
-│   ├ tickets-service
+├── services/
+│   ├── auth-service/               # ✅ Implementado — Fase 1
+│   ├── inventory-service/          # 🔲 Planejado
+│   ├── sales-service/              # 🔲 Planejado
+│   ├── delivery-service/           # 🔲 Planejado
+│   ├── tickets-service/            # 🔲 Planejado
+│   ├── users-service/              # 🔲 Planejado
+│   ├── crm-service/                # 🔲 Planejado
+│   └── analytics-service/          # 🔲 Planejado
 │
-├ gateway
-│
-├ shared
-│
-└ infrastructure
+├── gateway/                        # 🔲 Planejado — roteamento central
+├── frontend/                       # 🔲 Planejado — React + Vite
+├── shared/                         # Código compartilhado entre serviços
+├── infrastructure/                 # Configurações de infra centralizada
+└── README.md
 ```
 
 ---
 
-# Tecnologias Utilizadas
+## Tecnologias
 
-## Backend
+### Backend
+| Tecnologia | Versão | Uso |
+|---|---|---|
+| Node.js | 18+ | Runtime |
+| TypeScript | 5.9 | Linguagem |
+| Express | 5.x | Framework HTTP |
+| Prisma ORM | 7.x | Acesso ao banco |
+| PostgreSQL | 15 | Banco de dados |
+| JWT (jsonwebtoken) | 9.x | Autenticação |
+| bcrypt | 6.x | Hash de senhas |
 
-* Node.js
-* TypeScript
-* Express
-* Prisma ORM
-* PostgreSQL
-* JWT Authentication
-* Docker
+### Frontend (planejado)
+| Tecnologia | Uso |
+|---|---|
+| React | Interface |
+| Vite | Build tool |
+| TypeScript | Linguagem |
+| React Router | Navegação |
+| Tailwind CSS | Estilização |
 
-## Frontend
-
-* React
-* Vite
-* TypeScript
-* React Router
-* Tailwind / CSS Modules
-
-## Infraestrutura
-
-* Docker
-* Docker Compose
-* Microservices Architecture
-* REST APIs
-
----
-
-# Estrutura de Pastas do Projeto
-
-```
-Vibers
-│
-├ frontend
-│
-├ services
-│   ├ auth-service
-│   │
-│   │ ├ src
-│   │ │
-│   │ │ ├ modules
-│   │ │ │
-│   │ │ │ ├ auth
-│   │ │ │ │ ├ controllers
-│   │ │ │ │ ├ services
-│   │ │ │ │ └ dto
-│   │ │ │ │
-│   │ │ │ ├ users
-│   │ │ │ │ ├ controllers
-│   │ │ │ │ ├ services
-│   │ │ │ │ └ repositories
-│   │ │ │ │
-│   │ │ │ ├ tenants
-│   │ │ │ └ roles
-│   │ │ │
-│   │ │ ├ infrastructure
-│   │ │ │
-│   │ │ │ ├ database
-│   │ │ │ │ └ prisma
-│   │ │ │ │
-│   │ │ │ └ security
-│   │ │ │
-│   │ │ ├ shared
-│   │ │ │ └ utils
-│   │ │ │
-│   │ │ └ main.ts
-│   │
-│   │ ├ prisma
-│   │ │ ├ schema.prisma
-│   │ │ └ migrations
-│   │
-│   │ ├ docker-compose.yml
-│   │ ├ package.json
-│   │ └ tsconfig.json
-│
-└ README.md
-```
+### Infraestrutura
+| Tecnologia | Uso |
+|---|---|
+| Docker | Containerização |
+| Docker Compose | Orquestração local |
 
 ---
 
-# Serviços Planejados
+## Multi-Tenant
 
-## Auth Service
+O Vibers foi projetado como **SaaS multi-tenant**: uma única instância do sistema atende múltiplos clientes simultaneamente, com isolamento total de dados.
 
-Responsável por:
+```
+Tenant (empresa cliente)
+  └── Users          → usuários da empresa
+  └── Roles          → perfis de acesso
+  └── [Dados ERP]    → estoque, vendas, etc.
+```
 
-* autenticação
-* autorização
-* gerenciamento de usuários
-* tenants (clientes)
-* roles e permissões
-* tokens JWT
+- Cada usuário pertence a exatamente um `Tenant`
+- Todas as entidades de negócio carregam `tenantId` para garantir isolamento
+- O token JWT inclui `tenantId` no payload, identificando o contexto de cada requisição
 
 ---
 
-## Inventory Service
+## Ambiente com Docker
 
-Controle de estoque:
+A pasta `docker/` contém dois arquivos:
 
-* produtos
-* categorias
-* movimentações
-* estoque mínimo
-* fornecedores
+| Arquivo | Uso |
+|---|---|
+| `docker-compose.yml` | Desenvolvimento — sobe apenas a infraestrutura (banco de dados) |
+| `docker-compose.prod.yml` | Produção — sobe todos os serviços containerizados |
 
----
+### Desenvolvimento
 
-## Sales Service
+Em desenvolvimento, os serviços rodam localmente (`npm run dev`). O Docker gerencia apenas o banco:
 
-Gerenciamento de vendas:
-
-* pedidos
-* pagamentos
-* faturamento
-* integração com emissão de notas fiscais
-
----
-
-## Delivery Service
-
-Controle de entregas:
-
-* rotas
-* entregadores
-* status de entrega
-* histórico logístico
-
----
-
-## Tickets Service
-
-Sistema de suporte técnico:
-
-* abertura de chamados
-* categorização
-* base de conhecimento
-* dashboards de atendimento
-* documentação vinculada a chamados
-
----
-
-# Banco de Dados
-
-O sistema utiliza **PostgreSQL** como banco principal.
-
-ORM utilizado:
-
-* Prisma
-
-Cada microserviço possui seu próprio schema ou banco.
-
-Exemplo de entidades do auth-service:
-
-* Tenant
-* User
-* Role
-* UserRole
-* RefreshToken
-
----
-
-# Multi-Tenant
-
-O Vibers foi projetado como um **SaaS multi-tenant**, permitindo que uma única instância do sistema atenda múltiplos clientes.
-
-Cada tenant representa uma empresa utilizando o sistema.
-
-Estrutura:
-
-```
-Tenant
-   └ Users
-   └ Roles
-   └ Permissions
-   └ Data
-```
-
-Todas as entidades de negócio possuem referência ao **tenantId**.
-
----
-
-# Configuração do Ambiente
-
-## Requisitos
-
-* Node.js 18+
-* Docker
-* PostgreSQL
-* npm
-
----
-
-# Instalação
-
-Clonar o projeto:
-
-```
-git clone <repository-url>
-```
-
-Entrar no diretório do serviço:
-
-```
-cd services/auth-service
-```
-
-Instalar dependências:
-
-```
-npm install
-```
-
----
-
-# Configuração de Ambiente
-
-Criar arquivo `.env`
-
-```
-DATABASE_URL=postgresql://vibers:vibers@localhost:5432/vibers
-
-JWT_SECRET=super_secret_key
-```
-
----
-
-# Prisma
-
-Gerar cliente Prisma:
-
-```
-npx prisma generate
-```
-
-Rodar migrations:
-
-```
-npx prisma migrate dev
-```
-
-Abrir interface visual do banco:
-
-```
-npx prisma studio
-```
-
----
-
-# Rodando o Projeto
-
-Subir banco com Docker:
-
-```
+```bash
+cd docker
 docker-compose up -d
 ```
 
-Rodar serviço:
+| Serviço | Endereço |
+|---|---|
+| PostgreSQL | `localhost:5432` |
 
+### Produção
+
+```bash
+cd docker
+docker-compose -f docker-compose.prod.yml up -d
 ```
+
+| Serviço | Endereço |
+|---|---|
+| PostgreSQL | `localhost:5432` |
+| auth-service | `http://localhost:3000` |
+
+---
+
+## Quick Start — Desenvolvimento Local
+
+### Pré-requisitos
+- Node.js 18+
+- Docker e Docker Compose
+- npm
+
+### 1. Clonar o repositório
+
+```bash
+git clone <repository-url>
+cd Vibers
+```
+
+### 2. Subir o banco de dados
+
+```bash
+cd docker
+docker-compose up postgres -d
+```
+
+### 3. Configurar e rodar o auth-service
+
+```bash
+cd services/auth-service
+npm install
+```
+
+Criar o arquivo `.env`:
+```env
+DATABASE_URL="postgresql://postgres:Vibers@2112@localhost:5432/vibers?schema=public"
+JWT_SECRET=seu_segredo_aqui
+PORT=3000
+```
+
+Gerar o cliente Prisma e rodar as migrations:
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Iniciar o serviço:
+```bash
 npm run dev
 ```
 
-Servidor disponível em:
-
-```
-http://localhost:3000
-```
+O serviço estará disponível em `http://localhost:3000`.
 
 ---
 
-# Endpoint Inicial
+## Documentação dos Serviços
 
-Login:
+Cada serviço possui sua própria documentação detalhada:
 
-```
-POST /auth/login
-```
-
-Body:
-
-```
-{
- "email": "user@email.com",
- "password": "123456"
-}
-```
-
-Resposta:
-
-```
-{
- "access_token": "jwt_token"
-}
-```
+- [auth-service](services/auth-service/README.md) — Autenticação, usuários e tenants
 
 ---
 
-# Roadmap do Projeto
+## Roadmap
 
-## Fase 1
+### Fase 1 — Auth Service ✅ Completa
+- [x] Registro de tenant e primeiro usuário
+- [x] Login com JWT
+- [x] Middleware de autenticação
+- [x] CRUD de usuários (isolado por tenant)
+- [x] Gerenciamento de tenant
+- [x] Hash seguro de senhas com bcrypt
+- [x] Schema do banco com Prisma
 
-* Auth Service
-* Sistema de usuários
-* Multi-tenant
-* JWT authentication
+### Fase 2 — Núcleo do ERP 🔄 Próxima
+- [ ] Inventory Service (produtos, categorias, estoque)
+- [ ] Sales Service (pedidos, pagamentos)
+- [ ] Frontend — Dashboard inicial com React + Vite
+- [ ] API Gateway para roteamento centralizado
 
-## Fase 2
+### Fase 3 — Suporte e Inteligência
+- [ ] Tickets Service (chamados, base de conhecimento)
+- [ ] Analytics Service (dashboards, relatórios)
+- [ ] Notificações
 
-* Inventory Service
-* Sales Service
-* Dashboard inicial
-
-## Fase 3
-
-* Tickets Service
-* Base de conhecimento
-* Analytics
-
-## Fase 4
-
-* Integração com e-commerce
-* Sistema de entregas
-* IA para atendimento
-
----
-
-# Objetivo do Projeto
-
-O Vibers ERP pretende ser um **ecossistema completo de gestão empresarial**, permitindo que empresas utilizem:
-
-* ERP
-* CRM
-* Helpdesk
-* E-commerce
-* Analytics
-
-Tudo dentro de uma única plataforma integrada.
+### Fase 4 — Expansão
+- [ ] CRM Service
+- [ ] E-commerce Service
+- [ ] Delivery Service
+- [ ] IA para atendimento automatizado
 
 ---
 
-# Licença
+## Licença
 
 MIT License

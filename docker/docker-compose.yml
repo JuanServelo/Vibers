@@ -13,17 +13,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  auth-service:
-    build: 
-      context: ../services/auth-service 
-      dockerfile: Dockerfile            
-    container_name: vibers_auth_service
-    depends_on:
-      - postgres
-    environment:
-      DATABASE_URL: postgresql://postgres:Vibers%402112@postgres:5432/vibers
-    ports:
-      - "3000:3000"
-
 volumes:
   postgres_data:
